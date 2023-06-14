@@ -3,8 +3,11 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import Head from "next/head";
 import Link from "next/link";
 
+import { api } from "~/utils/api";
+
 const Home: NextPage = () => {
   const user = useUser();
+  const { data } = api.posts.getAll.useQuery();
 
   return (
     <>
@@ -20,6 +23,12 @@ const Home: NextPage = () => {
           Sign in
         </Link>
       )}
+      <div className="space-y-4">
+        <h1 className="text-5xl font-extrabold">Posts</h1>
+        {data?.map((post) => (
+          <div key={post.id}>{post.content}</div>
+        ))}
+      </div>
     </>
   );
 };
