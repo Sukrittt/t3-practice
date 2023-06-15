@@ -1,4 +1,5 @@
 import { type NextPage } from "next";
+import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import Head from "next/head";
 import Link from "next/link";
@@ -15,6 +16,16 @@ import { LoadingPage } from "~/components/loading";
 
 const CreatePostWizard = () => {
   const { user } = useUser();
+  const [input, setInput] = useState("");
+
+  const ctx = api.useContext();
+
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate();
+    },
+  });
 
   if (!user) {
     return null;
@@ -31,8 +42,18 @@ const CreatePostWizard = () => {
       />
       <input
         placeholder="Type some emogis!"
-        className="grow rounded-md bg-transparent px-2 transition focus:outline-none"
+        className="disabled:bg-opacity/70 grow rounded-md bg-transparent px-2 transition focus:outline-none disabled:cursor-not-allowed"
+        value={input}
+        type="text"
+        disabled={isPosting}
+        onChange={(e) => setInput(e.target.value)}
       />
+      <button
+        onClick={() => mutate({ content: input })}
+        className="transition hover:text-slate-300"
+      >
+        Post
+      </button>
     </div>
   );
 };
@@ -75,7 +96,7 @@ const Feed = () => {
     <div className="space-y-4">
       <h1 className="mt-2 text-center text-5xl font-extrabold">Posts</h1>
       <div className="flex flex-col ">
-        {data?.map((fullPost) => (
+        {data.map((fullPost) => (
           <PostView key={fullPost.post.id} {...fullPost} />
         ))}
       </div>
