@@ -87,8 +87,10 @@ const Feed = () => {
   if (!data) return <div>Something went wrong</div>;
 
   return (
-    <div className="space-y-4">
-      <h1 className="mt-2 text-center text-5xl font-extrabold">Posts</h1>
+    <div>
+      <h1 className="border-b border-slate-300 py-2 text-center text-5xl font-extrabold">
+        Posts
+      </h1>
       <div className="flex flex-col ">
         {data.map((fullPost) => (
           <PostView key={fullPost.post.id} {...fullPost} />
