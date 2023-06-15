@@ -59,7 +59,7 @@ const PostView = (props: PostWithUser) => {
           ).fromNow()}`}</span>
         </div>
 
-        <span className="">{post.content}</span>
+        <span className="text-2xl">{post.content}</span>
       </div>
     </div>
   );
