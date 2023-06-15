@@ -1,9 +1,68 @@
 import { type NextPage } from "next";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import Head from "next/head";
 import Link from "next/link";
 
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
+
 import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import Image from "next/image";
+
+const CreatePostWizard = () => {
+  const { user } = useUser();
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <div className="flex w-full gap-x-3">
+      <Image
+        src={user.profileImageUrl}
+        alt="profile image"
+        className="rounded-full"
+        height={56}
+        width={56}
+      />
+      <input
+        placeholder="Type some emogis!"
+        className="grow rounded-md bg-transparent px-2 transition focus:outline-none"
+      />
+    </div>
+  );
+};
+
+type PostWithUser = RouterOutputs["posts"]["getAll"][number];
+
+const PostView = (props: PostWithUser) => {
+  const { post, author } = props;
+
+  return (
+    <div className="flex items-center gap-x-2 border-b border-slate-400 px-4 py-8">
+      <Image
+        src={author.profileImageUrl}
+        alt={`@${author.username}'s profile picture`}
+        className="rounded-full"
+        height={56}
+        width={56}
+      />
+      <div className="flex flex-col">
+        <div className="flex gap-x-2 text-slate-300 ">
+          <span>{`@${author.username}`}</span>
+          <span className="font-thin">{`· ${dayjs(
+            post.createdAt
+          ).fromNow()}`}</span>
+        </div>
+
+        <span className="">{post.content}</span>
+      </div>
+    </div>
+  );
+};
 
 const Home: NextPage = () => {
   const user = useUser();
@@ -22,9 +81,9 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex h-screen justify-center">
         <div className="w-full border-x border-slate-400 md:max-w-2xl ">
-          <div className="border-b border-slate-200 p-4">
+          <div className="border-b border-slate-400 p-4">
             {user.isSignedIn ? (
-              <UserButton afterSignOutUrl="/" />
+              <CreatePostWizard />
             ) : (
               <Link
                 href="sign-in"
@@ -36,15 +95,13 @@ const Home: NextPage = () => {
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-5xl font-extrabold">Posts</h1>
+            <h1 className="mt-2 text-center text-5xl font-extrabold">Posts</h1>
             <div className="flex flex-col ">
               {!data && isLoading ? (
                 <p>Loading...</p>
               ) : (
-                data?.map((post) => (
-                  <div key={post.id} className="border-b border-slate-400 p-8">
-                    {post.content}
-                  </div>
+                data?.map((fullPost) => (
+                  <PostView key={fullPost.post.id} {...fullPost} />
                 ))
               )}
             </div>
